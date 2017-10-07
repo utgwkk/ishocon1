@@ -126,7 +126,7 @@ class Ishocon1::WebApp < Sinatra::Base
                  .to_a
                  .group_by {|e| e[:product_id]}
                  .values
-    products = db.xquery("SELECT SQL_CACHE * FROM products WHERE #{range_condition} ORDER BY id DESC LIMIT 50").to_a.map.with_index {|product, idx|
+    products = db.xquery("SELECT SQL_CACHE id, name, image_path, price, SUBSTRING(description, 1, 71) AS description FROM products WHERE #{range_condition} ORDER BY id DESC LIMIT 50").to_a.map.with_index {|product, idx|
       product[:comments_count] = comments[idx].size
       product[:comments] = comments[idx][0..4]
       product
