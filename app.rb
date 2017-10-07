@@ -69,7 +69,7 @@ class Ishocon1::WebApp < Sinatra::Base
     def already_bought?(product_id)
       return false unless current_user
       count = db.xquery('SELECT SQL_CACHE count(*) as count FROM histories WHERE product_id = ? AND user_id = ?', \
-                        product_id, current_user[:id]).first[:count]
+                        product_id, session[:user_id]).first[:count]
       count > 0
     end
 
@@ -90,7 +90,7 @@ class Ishocon1::WebApp < Sinatra::Base
 
   get '/login' do
     session.clear
-    erb :login, layout: false, locals: { message: 'ECサイトで爆買いしよう！！！！' }
+    erb :login, layout: false, locals: { message: 'ECサイトで爆買いしよう！！！！', current_user: current_user }
   end
 
   post '/login' do
@@ -126,7 +126,7 @@ class Ishocon1::WebApp < Sinatra::Base
       product
     }
 
-    erb :index, locals: { products: products }
+    erb :index, locals: { products: products, current_user: current_user }
   end
 
   get '/users/:user_id' do
@@ -143,24 +143,24 @@ ORDER BY h.id DESC
     total_pay = products.to_a.inject(0) {|sum, e| sum + e[:price] }
 
     user = db.xquery('SELECT SQL_CACHE id, name FROM users WHERE id = ?', params[:user_id]).first
-    erb :mypage, locals: { products: products, user: user, total_pay: total_pay }
+    erb :mypage, locals: { products: products, user: user, total_pay: total_pay, current_user: current_user }
   end
 
   get '/products/:product_id' do
     product = db.xquery('SELECT SQL_CACHE name, image_path, price, description FROM products WHERE id = ?', params[:product_id]).first
-    erb :product, locals: { product: product, already_bought: already_bought?(product[:id]) }
+    erb :product, locals: { product: product, already_bought: already_bought?(product[:id]), current_user: current_user }
   end
 
   post '/products/buy/:product_id' do
     authenticated!
-    buy_product(params[:product_id], current_user[:id])
-    redirect "/users/#{current_user[:id]}"
+    buy_product(params[:product_id], session[:user_id])
+    redirect "/users/#{session[:user_id]}"
   end
 
   post '/comments/:product_id' do
     authenticated!
-    create_comment(params[:product_id], current_user[:id], params[:content])
-    redirect "/users/#{current_user[:id]}"
+    create_comment(params[:product_id], session[:user_id], params[:content])
+    redirect "/users/#{session[:user_id]}"
   end
 
   get '/initialize' do

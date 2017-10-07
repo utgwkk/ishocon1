@@ -22,7 +22,7 @@
             <h4>購入日時</h4>
             <p><%= (product[:created_at]+9*60*60).strftime("%Y-%m-%d %H:%M:%S") %></p>
           </div>
-          <% if current_user && user[:id] == current_user[:id] %>
+          <% if current_user && user[:id] == session[:user_id] %>
             <div class="panel-footer">
               <form method="POST" action="/comments/<%= product[:id] %>">
                 <fieldset>

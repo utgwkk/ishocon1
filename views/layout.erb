@@ -13,10 +13,10 @@
       <a class="navbar-brand" href="/">すごいECサイトで爆買いしよう!</a>
     </div>
     <div class="header clearfix">
-    <% if current_user %>
+    <% if session[:user_id] %>
       <nav>
         <ul class="nav nav-pills pull-right">
-          <li role="presentation"><a href="/users/<%= current_user[:id] %>"><%= current_user[:name] %>さんの購入履歴</a></li>
+          <li role="presentation"><a href="/users/<%= session[:user_id] %>"><%= current_user[:name] %>さんの購入履歴</a></li>
           <li role="presentation"><a href="/logout">Logout</a></li>
         </ul>
       </nav>
