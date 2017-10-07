@@ -15,7 +15,6 @@ class Ishocon1::WebApp < Sinatra::Base
   use Rack::Session::Dalli, namespace: 'ishocon1', cache: Dalli::Client.new('/tmp/memcached.sock')
   #use Rack::Lineprof, profile: 'app.rb'
   set :erb, escape_html: true
-  set :public_folder, File.expand_path('../public', __FILE__)
   set :protection, true
 
   helpers do
@@ -62,10 +61,6 @@ class Ishocon1::WebApp < Sinatra::Base
       db.xquery('SELECT SQL_CACHE id, name FROM users WHERE id = ?', session[:user_id]).first
     end
 
-    def update_last_login(user_id)
-      db.xquery('UPDATE users SET last_login = ? WHERE id = ?', time_now_db, user_id)
-    end
-
     def buy_product(product_id, user_id)
       db.xquery('INSERT INTO histories (product_id, user_id, created_at) VALUES (?, ?, ?)', \
         product_id, user_id, time_now_db)
@@ -100,7 +95,6 @@ class Ishocon1::WebApp < Sinatra::Base
 
   post '/login' do
     authenticate(params['email'], params['password'])
-    update_last_login(current_user[:id])
     redirect '/'
   end
 
