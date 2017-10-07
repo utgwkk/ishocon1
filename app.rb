@@ -75,7 +75,7 @@ class Ishocon1::WebApp < Sinatra::Base
 
     def create_comment(product_id, user_id, content)
       db.xquery('INSERT INTO comments (product_id, user_id, content, created_at) VALUES (?, ?, ?, ?)', \
-        product_id, user_id, content, time_now_db)
+                product_id, user_id, content[0..25], time_now_db)
     end
   end
 
