@@ -111,17 +111,10 @@ class Ishocon1::WebApp < Sinatra::Base
 
   get '/' do
     page = params[:page].to_i || 0
-    products_query = %|
-    SELECT p.*, COUNT(*) AS comments_count FROM products p
-    LEFT OUTER JOIN comments c
-    ON c.product_id = p.id
-    GROUP BY p.id
-    ORDER BY p.id DESC
-    LIMIT 50
-    OFFSET #{page * 50}
-    |
-    products = db.xquery(products_query).to_a
+    products = db.xquery("SELECT * FROM products ORDER BY id DESC LIMIT 50 OFFSET #{page * 50}").to_a
     products.map! {|product|
+      cmt_count_query = 'SELECT count(*) as count FROM comments WHERE product_id = ?'
+      product[:comments_count] = db.xquery(cmt_count_query, product[:id]).first[:count]
         cmt_query = <<SQL
     SELECT *
     FROM comments as c
