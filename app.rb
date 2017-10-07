@@ -156,9 +156,8 @@ SQL
   end
 
   get '/products/:product_id' do
-    product = db.xquery('SELECT SQL_CACHE * FROM products WHERE id = ?', params[:product_id]).first
-    comments = db.xquery('SELECT SQL_CACHE * FROM comments WHERE product_id = ?', params[:product_id])
-    erb :product, locals: { product: product, comments: comments, already_bought: already_bought?(product[:id]) }
+    product = db.xquery('SELECT SQL_CACHE name, image_path, price, description FROM products WHERE id = ?', params[:product_id]).first
+    erb :product, locals: { product: product, already_bought: already_bought?(product[:id]) }
   end
 
   post '/products/buy/:product_id' do
