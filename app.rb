@@ -49,7 +49,7 @@ class Ishocon1::WebApp < Sinatra::Base
     end
 
     def authenticate(email, password)
-      user = db.xquery('SELECT SQL_CACHE * FROM users WHERE email = ?', email).first
+      user = db.xquery('SELECT SQL_CACHE id, password FROM users WHERE email = ?', email).first
       fail Ishocon1::AuthenticationError unless user[:password] == password
       session[:user_id] = user[:id]
     end
@@ -148,7 +148,7 @@ ORDER BY h.id DESC
 
     total_pay = products.to_a.inject(0) {|sum, e| sum + e[:price] }
 
-    user = db.xquery('SELECT SQL_CACHE * FROM users WHERE id = ?', params[:user_id]).first
+    user = db.xquery('SELECT SQL_CACHE id, name FROM users WHERE id = ?', params[:user_id]).first
     erb :mypage, locals: { products: products, user: user, total_pay: total_pay }
   end
 
