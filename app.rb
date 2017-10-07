@@ -54,7 +54,7 @@ class Ishocon1::WebApp < Sinatra::Base
     end
 
     def authenticated!
-      fail Ishocon1::PermissionDenied unless current_user
+      fail Ishocon1::PermissionDenied unless session[:user_id]
     end
 
     def current_user
