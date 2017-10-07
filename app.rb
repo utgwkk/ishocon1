@@ -48,7 +48,7 @@ class Ishocon1::WebApp < Sinatra::Base
     end
 
     def authenticate(email, password)
-      user = db.xquery('SELECT * FROM users WHERE email = ?', email).first
+      user = db.xquery('SELECT SQL_CACHE * FROM users WHERE email = ?', email).first
       fail Ishocon1::AuthenticationError unless user[:password] == password
       session[:user_id] = user[:id]
     end
@@ -58,7 +58,7 @@ class Ishocon1::WebApp < Sinatra::Base
     end
 
     def current_user
-      db.xquery('SELECT * FROM users WHERE id = ?', session[:user_id]).first
+      db.xquery('SELECT SQL_CACHE * FROM users WHERE id = ?', session[:user_id]).first
     end
 
     def update_last_login(user_id)
@@ -72,7 +72,7 @@ class Ishocon1::WebApp < Sinatra::Base
 
     def already_bought?(product_id)
       return false unless current_user
-      count = db.xquery('SELECT count(*) as count FROM histories WHERE product_id = ? AND user_id = ?', \
+      count = db.xquery('SELECT SQL_CACHE count(*) as count FROM histories WHERE product_id = ? AND user_id = ?', \
                         product_id, current_user[:id]).first[:count]
       count > 0
     end
@@ -111,10 +111,10 @@ class Ishocon1::WebApp < Sinatra::Base
 
   get '/' do
     page = params[:page].to_i || 0
-    max_id = db.xquery("SELECT MAX(id) AS max_id FROM products").first[:max_id]
+    max_id = db.xquery("SELECT SQL_CACHE MAX(id) AS max_id FROM products").first[:max_id]
     range_condition = "id BETWEEN #{max_id - (page + 1) * 50 + 1} AND #{max_id - page * 50}"
     comments_query = %|
-      SELECT product_id, name, SUBSTRING(content, 1, 26) AS content
+      SELECT SQL_CACHE product_id, name, SUBSTRING(content, 1, 26) AS content
       FROM comments c
       INNER JOIN users u
       ON c.user_id = u.id
@@ -125,7 +125,7 @@ class Ishocon1::WebApp < Sinatra::Base
                  .to_a
                  .group_by {|e| e[:product_id]}
                  .values
-    products = db.xquery("SELECT * FROM products WHERE #{range_condition} ORDER BY id DESC LIMIT 50").to_a.map.with_index {|product, idx|
+    products = db.xquery("SELECT SQL_CACHE * FROM products WHERE #{range_condition} ORDER BY id DESC LIMIT 50").to_a.map.with_index {|product, idx|
       product[:comments_count] = comments[idx].size
       product[:comments] = comments[idx][0..4]
       product
@@ -136,7 +136,7 @@ class Ishocon1::WebApp < Sinatra::Base
 
   get '/users/:user_id' do
     products_query = <<SQL
-SELECT p.id, p.name, p.description, p.image_path, p.price, h.created_at
+SELECT SQL_CACHE p.id, p.name, p.description, p.image_path, p.price, h.created_at
 FROM histories as h
 LEFT OUTER JOIN products as p
 ON h.product_id = p.id
@@ -150,13 +150,13 @@ SQL
       total_pay += product[:price]
     end
 
-    user = db.xquery('SELECT * FROM users WHERE id = ?', params[:user_id]).first
+    user = db.xquery('SELECT SQL_CACHE * FROM users WHERE id = ?', params[:user_id]).first
     erb :mypage, locals: { products: products, user: user, total_pay: total_pay }
   end
 
   get '/products/:product_id' do
-    product = db.xquery('SELECT * FROM products WHERE id = ?', params[:product_id]).first
-    comments = db.xquery('SELECT * FROM comments WHERE product_id = ?', params[:product_id])
+    product = db.xquery('SELECT SQL_CACHE * FROM products WHERE id = ?', params[:product_id]).first
+    comments = db.xquery('SELECT SQL_CACHE * FROM comments WHERE product_id = ?', params[:product_id])
     erb :product, locals: { product: product, comments: comments }
   end
 
