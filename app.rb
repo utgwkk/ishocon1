@@ -146,10 +146,7 @@ ORDER BY h.id DESC
 SQL
     products = db.xquery(products_query, params[:user_id])
 
-    total_pay = 0
-    products.each do |product|
-      total_pay += product[:price]
-    end
+    total_pay = products.to_a.inject(0) {|sum, e| sum + e[:price] }
 
     user = db.xquery('SELECT SQL_CACHE * FROM users WHERE id = ?', params[:user_id]).first
     erb :mypage, locals: { products: products, user: user, total_pay: total_pay }
