@@ -21,8 +21,7 @@ class Ishocon1::WebApp < Sinatra::Base
     def config
       @config ||= {
         db: {
-          host: ENV['ISHOCON1_DB_HOST'] || 'localhost',
-          port: ENV['ISHOCON1_DB_PORT'] && ENV['ISHOCON1_DB_PORT'].to_i,
+          socket: '/var/lib/mysql/mysql.sock',
           username: ENV['ISHOCON1_DB_USER'] || 'ishocon',
           password: ENV['ISHOCON1_DB_PASSWORD'] || 'ishocon',
           database: ENV['ISHOCON1_DB_NAME'] || 'ishocon1'
@@ -33,8 +32,7 @@ class Ishocon1::WebApp < Sinatra::Base
     def db
       return Thread.current[:ishocon1_db] if Thread.current[:ishocon1_db]
       client = Mysql2::Client.new(
-        host: config[:db][:host],
-        port: config[:db][:port],
+        socket: config[:db][:socket],
         username: config[:db][:username],
         password: config[:db][:password],
         database: config[:db][:database],
