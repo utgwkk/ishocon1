@@ -59,7 +59,7 @@ class Ishocon1::WebApp < Sinatra::Base
     end
 
     def current_user
-      db.xquery('SELECT SQL_CACHE * FROM users WHERE id = ?', session[:user_id]).first
+      db.xquery('SELECT SQL_CACHE id, name FROM users WHERE id = ?', session[:user_id]).first
     end
 
     def update_last_login(user_id)
