@@ -111,19 +111,24 @@ class Ishocon1::WebApp < Sinatra::Base
 
   get '/' do
     page = params[:page].to_i || 0
-    products = db.xquery("SELECT * FROM products ORDER BY id DESC LIMIT 50 OFFSET #{page * 50}")
-    cmt_query = <<SQL
-SELECT *
-FROM comments as c
-INNER JOIN users as u
-ON c.user_id = u.id
-WHERE c.product_id = ?
-ORDER BY c.created_at DESC
-LIMIT 5
+    products = db.xquery("SELECT * FROM products ORDER BY id DESC LIMIT 50 OFFSET #{page * 50}").to_a
+    products.map! {|product|
+      cmt_count_query = 'SELECT count(*) as count FROM comments WHERE product_id = ?'
+      product[:comments_count] = db.xquery(cmt_count_query, product[:id]).first[:count]
+        cmt_query = <<SQL
+    SELECT *
+    FROM comments as c
+    INNER JOIN users as u
+    ON c.user_id = u.id
+    WHERE c.product_id = ?
+    ORDER BY c.created_at DESC
+    LIMIT 5
 SQL
-    cmt_count_query = 'SELECT count(*) as count FROM comments WHERE product_id = ?'
+      product[:comments] = db.xquery(cmt_query, product[:id])
+      product
+    }
 
-    erb :index, locals: { products: products, cmt_query: cmt_query, cmt_count_query: cmt_count_query }
+    erb :index, locals: { products: products }
   end
 
   get '/users/:user_id' do
