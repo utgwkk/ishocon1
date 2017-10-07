@@ -147,8 +147,13 @@ ORDER BY h.id DESC
   end
 
   get '/products/:product_id' do
-    product = db.xquery('SELECT SQL_CACHE name, image_path, price, description FROM products WHERE id = ?', params[:product_id]).first
-    erb :product, locals: { product: product, already_bought: already_bought?(product[:id]), current_user: current_user }
+    product = db.xquery(%|SELECT SQL_CACHE name, image_path, price, description, user_id IS NOT NULL AS already_bought
+                        FROM products p
+                        LEFT OUTER JOIN histories h
+                        ON h.product_id = p.id AND h.user_id = ?
+                        WHERE p.id = ?
+                        LIMIT 1|, (current_user && current_user[:id]) || 0, params[:product_id]).first
+    erb :product, locals: { product: product, already_bought: product[:already_bought] > 0, current_user: current_user }
   end
 
   post '/products/buy/:product_id' do
