@@ -66,13 +66,6 @@ class Ishocon1::WebApp < Sinatra::Base
         product_id, user_id, time_now_db)
     end
 
-    def already_bought?(product_id)
-      return false unless current_user
-      count = db.xquery('SELECT SQL_CACHE count(*) as count FROM histories WHERE product_id = ? AND user_id = ?', \
-                        product_id, session[:user_id]).first[:count]
-      count > 0
-    end
-
     def create_comment(product_id, user_id, content)
       db.xquery('INSERT INTO comments (product_id, user_id, content, created_at) VALUES (?, ?, ?, ?)', \
                 product_id, user_id, content[0..25], time_now_db)
