@@ -120,7 +120,7 @@ class Ishocon1::WebApp < Sinatra::Base
                  .to_a
                  .group_by {|e| e[:product_id]}
                  .values
-    products = db.xquery("SELECT SQL_CACHE id, name, image_path, price, SUBSTRING(description, 1, 71) AS description FROM products WHERE #{range_condition} ORDER BY id DESC LIMIT 50").to_a.map.with_index {|product, idx|
+    products = db.xquery("SELECT SQL_CACHE id, name, image_path, price, SUBSTRING(description, 1, 70) AS description FROM products WHERE #{range_condition} ORDER BY id DESC LIMIT 50").to_a.map.with_index {|product, idx|
       product[:comments_count] = comments[idx].size
       product[:comments] = comments[idx][0..4]
       product
@@ -131,7 +131,7 @@ class Ishocon1::WebApp < Sinatra::Base
 
   get '/users/:user_id' do
     products_query = %|
-SELECT SQL_CACHE p.id, p.name, SUBSTRING(p.description, 1, 71) AS description, p.image_path, p.price, h.created_at
+SELECT SQL_CACHE p.id, p.name, SUBSTRING(p.description, 1, 70) AS description, p.image_path, p.price, h.created_at
 FROM histories as h
 LEFT OUTER JOIN products as p
 ON h.product_id = p.id
