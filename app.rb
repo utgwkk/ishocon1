@@ -4,6 +4,7 @@ require 'mysql2-cs-bind'
 require 'tilt/erubis'
 require 'rack-lineprof'
 require 'rack/session/dalli'
+require 'rack/cache'
 
 module Ishocon1
   class AuthenticationError < StandardError; end
@@ -16,6 +17,9 @@ class Ishocon1::WebApp < Sinatra::Base
   #use Rack::Lineprof, profile: 'app.rb'
   set :erb, escape_html: true
   set :protection, true
+  use Rack::Cache,
+    metastore: 'file:/var/cache/rack/meta',
+    entitystore: 'file:/var/cache/rack/body'
 
   helpers do
     def config
