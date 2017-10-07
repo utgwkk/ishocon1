@@ -113,19 +113,21 @@ class Ishocon1::WebApp < Sinatra::Base
     page = params[:page].to_i || 0
     max_id = db.xquery("SELECT MAX(id) AS max_id FROM products").first[:max_id]
     range_condition = "id BETWEEN #{max_id - (page + 1) * 50 + 1} AND #{max_id - page * 50}"
-    products_counts = db.xquery("SELECT product_id AS id, COUNT(*) AS cnt FROM comments WHERE product_#{range_condition} GROUP BY product_id ORDER BY id DESC LIMIT 50").to_a
+    comments_query = %|
+      SELECT product_id, name, SUBSTRING(content, 1, 26) AS content
+      FROM comments c
+      INNER JOIN users u
+      ON c.user_id = u.id
+      WHERE product_#{range_condition}
+      ORDER BY product_id DESC, c.created_at DESC
+    |
+    comments = db.xquery(comments_query)
+                 .to_a
+                 .group_by {|e| e[:product_id]}
+                 .values
     products = db.xquery("SELECT * FROM products WHERE #{range_condition} ORDER BY id DESC LIMIT 50").to_a.map.with_index {|product, idx|
-      product[:comments_count] = products_counts[idx][:cnt]
-        cmt_query = <<SQL
-    SELECT name, SUBSTRING(content, 1, 26) AS content
-    FROM comments as c
-    INNER JOIN users as u
-    ON c.user_id = u.id
-    WHERE c.product_id = ?
-    ORDER BY c.created_at DESC
-    LIMIT 5
-SQL
-      product[:comments] = db.xquery(cmt_query, product[:id])
+      product[:comments_count] = comments[idx].size
+      product[:comments] = comments[idx][0..4]
       product
     }
 
