@@ -90,7 +90,7 @@ class Ishocon1::WebApp < Sinatra::Base
 
   get '/login' do
     session.clear
-    erb :login, layout: false, locals: { message: 'ECサイトで爆買いしよう！！！！', current_user: current_user }
+    erb :login, layout: false, locals: { message: 'ECサイトで爆買いしよう！！！！' }
   end
 
   post '/login' do
