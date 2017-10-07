@@ -116,7 +116,7 @@ class Ishocon1::WebApp < Sinatra::Base
       cmt_count_query = 'SELECT count(*) as count FROM comments WHERE product_id = ?'
       product[:comments_count] = db.xquery(cmt_count_query, product[:id]).first[:count]
         cmt_query = <<SQL
-    SELECT *
+    SELECT name, SUBSTRING(content, 1, 26) AS content
     FROM comments as c
     INNER JOIN users as u
     ON c.user_id = u.id
