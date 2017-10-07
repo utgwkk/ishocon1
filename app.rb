@@ -136,14 +136,14 @@ class Ishocon1::WebApp < Sinatra::Base
   end
 
   get '/users/:user_id' do
-    products_query = <<SQL
-SELECT SQL_CACHE p.id, p.name, p.description, p.image_path, p.price, h.created_at
+    products_query = %|
+SELECT SQL_CACHE p.id, p.name, SUBSTRING(p.description, 1, 71) AS description, p.image_path, p.price, h.created_at
 FROM histories as h
 LEFT OUTER JOIN products as p
 ON h.product_id = p.id
 WHERE h.user_id = ?
 ORDER BY h.id DESC
-SQL
+    |
     products = db.xquery(products_query, params[:user_id])
 
     total_pay = products.to_a.inject(0) {|sum, e| sum + e[:price] }
