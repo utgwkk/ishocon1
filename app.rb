@@ -1,7 +1,7 @@
 require 'sinatra/base'
 require 'mysql2'
 require 'mysql2-cs-bind'
-require 'erubis'
+require 'tilt/erubis'
 require 'rack-lineprof'
 require 'rack/session/dalli'
 
